@@ -1,0 +1,81 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id            String       @id @default(uuid())
+  name          String
+  email         String       @unique
+  password      String
+  webhookSecret String?      @unique // Unique secret token for webhook bridging
+  skills        Skill[]
+  quests        UserQuest[]
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+}
+
+enum AttributeType {
+  COGNITIVE
+  PHYSICAL
+  EMOTIONAL
+  TECHNICAL
+  CREATIVE
+  FINANCIAL
+}
+
+model Skill {
+  id          String               @id @default(uuid())
+  name        String
+  description String?
+  attribute   AttributeType        // Must map to one of the 6 core attributes
+  userId      String
+  user        User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
+  embedding   Unsupported("vector")? // 384-dimensional vector embedding for all-MiniLM-L6-v2
+  verified    Boolean              @default(false) // True if backed by DigiLocker/Authentic source
+  sourceDocId String?              // Reference tracker for verification source log
+  progress    UserSkillProgress[]
+  createdAt   DateTime             @default(now())
+  updatedAt   DateTime             @updatedAt
+}
+
+model UserSkillProgress {
+  id        String   @id @default(uuid())
+  skillId   String
+  skill     Skill    @relation(fields: [skillId], references: [id], onDelete: Cascade)
+  level     Int      @default(1) // Numerical progression tier
+  xp        Int      @default(0) // Experience points accumulated via tasks/quests
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Quest {
+  id          String        @id @default(uuid())
+  title       String
+  description String
+  attribute   AttributeType
+  xpReward    Int           @default(50)
+  userQuests  UserQuest[]
+  createdAt   DateTime      @default(now())
+}
+
+model UserQuest {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  questId   String
+  quest     Quest    @relation(fields: [questId], references: [id], onDelete: Cascade)
+  status    String   @default("PENDING") // PENDING, COMPLETED
+  createdAt DateTime @default(now())
+}
+
+model DataSourceLog {
+  id        String   @id @default(uuid())
+  source    String   // e.g., "DIGILOCKER", "AI_QUEST_GENERATOR"
+  payload   String
+  createdAt DateTime @default(now())
+}

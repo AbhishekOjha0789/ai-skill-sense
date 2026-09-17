@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Skill Sense | Life Operating System</title>
+    <!-- Tailwind CSS for modern styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        cyberDark: '#0a0f1d',
+                        cyberPanel: '#111827',
+                        cyberNeon: '#00F0FF',
+                        cyberPurple: '#8B5CF6'
+                    }
+                }
+            }
+        }
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;600&family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .font-mono { font-family: 'Fira Code', monospace; }
+    </style>
+</head>
+<body class="bg-cyberDark text-gray-100 min-h-screen flex flex-col">
+
+    <!-- Top Navigation -->
+    <header class="border-b border-gray-800 bg-cyberPanel/50 backdrop-blur-md px-6 py-4 flex justify-between items-center sticky top-0 z-50">
+        <div class="flex items-center space-x-3">
+            <div class="w-3 h-3 bg-cyberNeon rounded-full animate-pulse shadow-[0_0_10px_#00F0FF]"></div>
+            <h1 class="font-mono text-xl font-bold tracking-wider text-cyberNeon">AI SKILL SENSE <span class="text-xs text-gray-400 font-normal">v2.0</span></h1>
+        </div>
+        <div id="auth-status" class="text-sm font-mono text-gray-400">
+            <!-- Dynamic Auth Status -->
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="flex-1 max-w-7xl w-full mx-auto p-6 grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+        <!-- Column 1 & 2: Auth / Activity Submission Engine -->
+        <div class="lg:col-span-2 space-y-6">
+
+            <!-- Authentication Card (Hidden if logged in) -->
+            <div id="auth-card" class="bg-cyberPanel border border-gray-800 rounded-xl p-6 shadow-xl">
+                <h2 class="text-lg font-bold font-mono mb-4 text-cyberNeon">Secure Terminal Auth</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <!-- Login Form -->
+                    <div class="space-y-3">
+                        <h3 class="text-sm font-semibold text-gray-400">Login</h3>
+                        <input type="email" id="login-email" placeholder="Email" class="w-full bg-gray-900 border border-gray-700 rounded-lg px-4 py-2 text-sm focus:outline-none focus:border-cyberNeon">
+                        <input type="password" id="login-password" placeholder="Password" class="w-full bg-gray-900 border border-gray-700 rounded-lg px-4 py-2 text-sm focus:outline-none focus:border-cyberNeon">
+                        <button onclick="handleLogin()" class="w-full bg-cyberNeon text-cyberDark font-bold py-2 rounded-lg hover:opacity-90 transition">Initialize Session</button>
+                    </div>
+                    <!-- Register Form -->
+                    <div class="space-y-3">
+                        <h3 class="text-sm font-semibold text-gray-400">Register New Operative</h3>
+                        <input type="text" id="reg-name" placeholder="Name" class="w-full bg-gray-900 border border-gray-700 rounded-lg px-4 py-2 text-sm focus:outline-none focus:border-cyberPurple">
+                        <input type="email" id="reg-email" placeholder="Email" class="w-full bg-gray-900 border border-gray-700 rounded-lg px-4 py-2 text-sm focus:outline-none focus:border-cyberPurple">
+                        <input type="password" id="reg-password" placeholder="Password" class="w-full bg-gray-900 border border-gray-700 rounded-lg px-4 py-2 text-sm focus:outline-none focus:border-cyberPurple">
+                        <button onclick="handleRegister()" class="w-full bg-cyberPurple text-white font-bold py-2 rounded-lg hover:opacity-90 transition">Register & Boot</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Agent Mesh Activity Ingestion Card -->
+            <div id="mesh-card" class="bg-cyberPanel border border-gray-800 rounded-xl p-6 shadow-xl opacity-50 pointer-events-none transition-all">
+                <h2 class="text-lg font-bold font-mono mb-4 text-cyberNeon flex items-center justify-between">
+                    <span>Commander Agent Mesh Pipeline</span>
+                    <span id="mesh-badge" class="text-xs bg-red-900/50 text-red-400 border border-red-700 px-2 py-0.5 rounded">Locked (Auth Required)</span>
+                </h2>
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-xs font-mono text-gray-400 mb-1">ACTIVITY TITLE</label>
+                        <input type="text" id="activity-title" placeholder="e.g., Architected Distributed Microservices" class="w-full bg-gray-900 border border-gray-700 rounded-lg px-4 py-2 text-sm focus:outline-none focus:border-cyberNeon">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-mono text-gray-400 mb-1">DESCRIPTION & TELEMETRY</label>
+                        <textarea id="activity-desc" rows="3" placeholder="Describe technical scope, impact, or architecture..." class="w-full bg-gray-900 border border-gray-700 rounded-lg px-4 py-2 text-sm focus:outline-none focus:border-cyberNeon"></textarea>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-mono text-gray-400 mb-1">SOURCE TYPE</label>
+                            <select id="activity-source" class="w-full bg-gray-900 border border-gray-700 rounded-lg px-4 py-2 text-sm focus:outline-none focus:border-cyberNeon">
+                                <option value="GITHUB_COMMIT">GITHUB_COMMIT</option>
+                                <option value="MANUAL_ENTRY">MANUAL_ENTRY</option>
+                                <option value="SYSTEM_DAEMON">SYSTEM_DAEMON</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-mono text-gray-400 mb-1">COMPLEXITY</label>
+                            <select id="activity-complexity" class="w-full bg-gray-900 border border-gray-700 rounded-lg px-4 py-2 text-sm focus:outline-none focus:border-cyberNeon">
+                                <option value="COMPLEX">COMPLEX</option>
+                                <option value="MODERATE">MODERATE</option>
+                                <option value="SIMPLE">SIMPLE</option>
+                            </select>
+                        </div>
+                    </div>
+                    <button onclick="runAgentMesh()" class="w-full bg-gradient-to-r from-cyberNeon to-cyberPurple text-cyberDark font-bold py-3 rounded-lg hover:opacity-90 transition shadow-[0_0_15px_rgba(0,240,255,0.3)]">
+                        Execute Agentic Tool-Calling Loop 🚀
+                    </button>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Column 3: Real-time Output & Quest Matrix -->
+        <div class="space-y-6">
+            
+            <!-- Progression Card -->
+            <div class="bg-cyberPanel border border-gray-800 rounded-xl p-6 shadow-xl">
+                <h3 class="text-sm font-mono font-bold text-gray-400 uppercase tracking-wider mb-3">Progression Telemetry</h3>
+                <div id="progression-output" class="text-xs font-mono text-gray-500 bg-gray-950 p-4 rounded-lg border border-gray-800/50 min-h-[100px] flex items-center justify-center">
+                    Awaiting mesh execution telemetry...
+                </div>
+            </div>
+
+            <!-- Dynamic Quest Matrix Card -->
+            <div id="quest-card" class="bg-cyberPanel border border-gray-800 rounded-xl p-6 shadow-xl relative overflow-hidden">
+                <div id="quest-accent-bar" class="absolute top-0 left-0 w-1.5 h-full bg-gray-700 transition-all"></div>
+                <h3 class="text-sm font-mono font-bold text-gray-400 uppercase tracking-wider mb-3">Active Growth Quest</h3>
+                <div id="quest-output" class="text-xs font-mono text-gray-400 bg-gray-950 p-4 rounded-lg border border-gray-800/50 min-h-[150px] flex flex-col justify-center items-center text-center">
+                    <span>No active quest generated. Run an activity mesh to architect a challenge.</span>
+                </div>
+            </div>
+
+        </div>
+
+    </main>
+
+    <!-- Frontend Script Logic -->
+    <script>
+        let authToken = localStorage.getItem('ai_skill_token') || null;
+
+        function updateUIState() {
+            const authCard = document.getElementById('auth-card');
+            const meshCard = document.getElementById('mesh-card');
+            const meshBadge = document.getElementById('mesh-badge');
+            const authStatus = document.getElementById('auth-status');
+
+            if (authToken) {
+                authCard.style.display = 'none';
+                meshCard.style.opacity = '1';
+                meshCard.style.pointerEvents = 'auto';
+                meshBadge.className = 'text-xs bg-emerald-900/50 text-emerald-400 border border-emerald-700 px-2 py-0.5 rounded';
+                meshBadge.innerText = 'Online & Ready';
+                authStatus.innerHTML = `<span class="text-emerald-400">●</span> Connected <button onclick="handleLogout()" class="ml-3 text-xs text-red-400 hover:underline">[Logout]</button>`;
+            } else {
+                authCard.style.display = 'block';
+                meshCard.style.opacity = '0.5';
+                meshCard.style.pointerEvents = 'none';
+                meshBadge.className = 'text-xs bg-red-900/50 text-red-400 border border-red-700 px-2 py-0.5 rounded';
+                meshBadge.innerText = 'Locked (Auth Required)';
+                authStatus.innerText = 'Disconnected';
+            }
+        }
+
+        async function handleRegister() {
+            const name = document.getElementById('reg-name').value;
+            const email = document.getElementById('reg-email').value;
+            const password = document.getElementById('reg-password').value;
+
+            try {
+                const res = await fetch('/api/auth/register', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name, email, password })
+                });
+                const data = await res.json();
+                if (res.ok) {
+                    authToken = data.token || data.accessToken;
+                    localStorage.setItem('ai_skill_token', authToken);
+                    updateUIState();
+                    alert('Registration successful!');
+                } else {
+                    alert(data.error || 'Registration failed');
+                }
+            } catch (err) {
+                alert('Connection error: ' + err.message);
+            }
+        }
+
+        async function handleLogin() {
+            const email = document.getElementById('login-email').value;
+            const password = document.getElementById('login-password').value;
+
+            try {
+                const res = await fetch('/api/auth/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                });
+                const data = await res.json();
+                if (res.ok) {
+                    authToken = data.token || data.accessToken;
+                    localStorage.setItem('ai_skill_token', authToken);
+                    updateUIState();
+                    alert('Session initialized successfully!');
+                } else {
+                    alert(data.error || 'Login failed');
+                }
+            } catch (err) {
+                alert('Connection error: ' + err.message);
+            }
+        }
+
+        function handleLogout() {
+            authToken = null;
+            localStorage.removeItem('ai_skill_token');
+            updateUIState();
+        }
+
+        async function runAgentMesh() {
+            const title = document.getElementById('activity-title').value;
+            const description = document.getElementById('activity-desc').value;
+            const sourceType = document.getElementById('activity-source').value;
+            const complexity = document.getElementById('activity-complexity').value;
+
+            if (!title || !description) {
+                alert('Please enter a title and description.');
+                return;
+            }
+
+            const progressionBox = document.getElementById('progression-output');
+            const questBox = document.getElementById('quest-output');
+            const accentBar = document.getElementById('quest-accent-bar');
+
+            progressionBox.innerHTML = '<span class="text-cyberNeon animate-pulse">Executing Commander Engine tool loop...</span>';
+            questBox.innerHTML = '<span class="text-cyberPurple animate-pulse">Architecting dynamic growth quest...</span>';
+
+            try {
+                const res = await fetch('/api/agents/run-mesh', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ title, description, sourceType, complexity })
+                });
+
+                const data = await res.json();
+                if (res.ok) {
+                    const result = data.result;
+                    
+                    // Render Progression
+                    progressionBox.innerHTML = `
+                        <div class="text-left space-y-1">
+                            <p class="text-emerald-400 font-bold">✓ XP Earned: +${result.progression.xpEarned}</p>
+                            <p class="text-gray-300">Attribute: <span class="text-cyberNeon">${result.progression.attributeWeight}</span></p>
+                            <p class="text-gray-400 text-[11px]">${result.progression.reasoning}</p>
+                        </div>
+                    `;
+
+                    // Render Quest using agent's dynamic UI metadata
+                    const quest = result.quest;
+                    const accentColor = quest.uiConfig?.accentColorHex || '#00F0FF';
+                    accentBar.style.backgroundColor = accentColor;
+
+                    questBox.innerHTML = `
+                        <div class="text-left space-y-2 w-full">
+                            <div class="flex justify-between items-center">
+                                <span class="text-xs px-2 py-0.5 rounded font-bold" style="background-color: ${accentColor}20; color: ${accentColor};">${quest.difficulty}</span>
+                                <span class="text-gray-400 text-[10px]">Reward: +${quest.suggestedXpReward} XP</span>
+                            </div>
+                            <h4 class="font-bold text-gray-200 text-sm">${quest.questTitle}</h4>
+                            <p class="text-gray-400 text-[11px] leading-relaxed">${quest.questDescription}</p>
+                        </div>
+                    `;
+                } else {
+                    progressionBox.innerHTML = `<span class="text-red-400">Error: ${data.error}</span>`;
+                    questBox.innerHTML = `<span class="text-red-400">Execution failed.</span>`;
+                }
+            } catch (err) {
+                alert('Mesh execution error: ' + err.message);
+            }
+        }
+
+        // Initialize state on load
+        updateUIState();
+    </script>
+</body>
+</html>

@@ -15,4 +15,5 @@ RUN npx prisma generate
 
 EXPOSE 5000
 
-CMD ["npm", "run", "dev"]
+# Automatically push the Prisma schema to Supabase on startup, then start the server
+CMD ["sh", "-c", "npx prisma db push && npm run dev"]

@@ -67,6 +67,41 @@ router.get('/matrix', verifyToken, async (req, res) => {
   }
 });
 
+// Add this route to your existing Express router file
+router.get('/profile', verifyToken, async (req, res) => {
+  try {
+    const userId = req.user.userId;
+
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      include: {
+        skills: { include: { progress: true } },
+        quests: { include: { quest: true } }
+      }
+    });
+
+    if (!user) {
+      return res.status(404).json({ error: 'User not found.' });
+    }
+
+    // Return the user object formatted with their skills and quests so Flutter can parse it
+    return res.status(200).json({
+      user: {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        skills: user.skills,
+        quests: user.quests,
+        createdAt: user.createdAt,
+        updatedAt: user.updatedAt
+      }
+    });
+  } catch (error) {
+    console.error('Failed to fetch profile:', error.message);
+    return res.status(500).json({ error: error.message });
+  }
+});
+
 router.get('/webhook-bridge', verifyToken, async (req, res) => {
     try {
         const userId = req.user.userId;

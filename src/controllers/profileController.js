@@ -4,7 +4,8 @@ const VALID_ATTRIBUTES = ['COGNITIVE', 'PHYSICAL', 'EMOTIONAL', 'TECHNICAL', 'CR
 
 export async function getUserMatrix(req, res) {
   try {
-    const { userId } = req.params;
+    // FIX: Use userId from the verified JWT middleware instead of req.params
+    const userId = req.user.userId;
 
     // Fetch user with their skills (and progress) and assigned quests
     const user = await prisma.user.findUnique({
@@ -37,7 +38,6 @@ export async function getUserMatrix(req, res) {
 
     let overallXp = 0;
 
-    // Aggregate user skills into their respective attribute buckets
     user.skills.forEach(skill => {
       const attr = skill.attribute;
       if (attributeMatrix[attr]) {
@@ -50,7 +50,6 @@ export async function getUserMatrix(req, res) {
         const skillLevel = skill.progress[0]?.level || 1;
 
         attributeMatrix[attr].totalXp += skillXp;
-        // Calculate cumulative level for the attribute pillar based on XP
         attributeMatrix[attr].level = Math.floor(attributeMatrix[attr].totalXp / 150) + 1;
 
         overallXp += skillXp;
@@ -66,12 +65,18 @@ export async function getUserMatrix(req, res) {
       }
     });
 
+    // FIX: Include full user details (including skills and quests) 
+    // so Flutter's User.fromJson() can parse them correctly without defaulting to empty lists.
     return res.status(200).json({
       user: {
         id: user.id,
         name: user.name,
         email: user.email,
-        overallXp
+        overallXp,
+        skills: user.skills,
+        quests: user.quests,
+        createdAt: user.createdAt,
+        updatedAt: user.updatedAt
       },
       attributeMatrix,
       quests: user.quests

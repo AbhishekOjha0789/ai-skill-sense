@@ -6,6 +6,7 @@ import { fileURLToPath } from 'url';
 import prisma from './services/prisma.js';
 import authRoutes from './routes/authRoutes.js';
 import webhookRoutes from './routes/webhookRoutes.js';
+import { DaemonController } from './agents/daemon.controller.js';
 import skillRoutes from './routes/skillRoutes.js';
 import agentRoutes from './routes/agentRoutes.js';
 import verificationRoutes from './routes/verificationRoutes.js';

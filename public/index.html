@@ -3,148 +3,128 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Skill Sense | Life-Growth Ecosystem</title>
+    <title>AI Skill Sense | Autonomous Command Center</title>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <style>body { font-family: 'Inter', sans-serif; }</style>
+    <link rel="stylesheet" href="css/main.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .font-mono { font-family: 'JetBrains Mono', monospace; }
+        .glow-card { background: linear-gradient(180deg, rgba(30, 41, 59, 0.4) 0%, rgba(15, 23, 42, 0.7) 100%); }
+        .modal-backdrop { background: rgba(2, 6, 23, 0.85); backdrop-filter: blur(10px); }
+    </style>
 </head>
-<body class="bg-slate-950 text-slate-100 min-h-screen">
+<body class="bg-slate-950 text-slate-100 min-h-screen selection:bg-emerald-500 selection:text-slate-950">
 
-    <!-- Navbar -->
-    <nav class="border-b border-slate-800 bg-slate-900/50 backdrop-blur sticky top-0 z-50 px-6 py-4 flex justify-between items-center">
-        <div class="flex items-center space-x-3">
-            <div class="h-3 w-3 rounded-full bg-emerald-500 animate-pulse"></div>
-            <span class="font-bold text-lg tracking-wider text-white">AI SKILL SENSE</span>
-        </div>
-        <div id="auth-nav" class="flex items-center space-x-4">
-            <span id="user-display" class="text-sm text-slate-400 hidden"></span>
-            <button onclick="logout()" id="logout-btn" class="hidden text-xs bg-red-500/10 text-red-400 border border-red-500/20 px-3 py-1.5 rounded-lg hover:bg-red-500/20 transition">Logout</button>
-        </div>
-    </nav>
-
-    <!-- Main Container -->
-    <main class="max-w-6xl mx-auto px-6 py-8">
-
-        <!-- AUTH SECTION (Visible when logged out) -->
-        <section id="auth-section" class="max-w-md mx-auto bg-slate-900 border border-slate-800 rounded-2xl p-8 shadow-xl mt-12">
-            <h2 id="auth-title" class="text-2xl font-bold mb-2 text-white">Welcome Back</h2>
-            <p class="text-sm text-slate-400 mb-6">Log in to view your life pillars and active growth quests.</p>
+    <!-- AUTHENTICATION SCREEN -->
+    <div id="screen-auth" class="min-h-screen flex items-center justify-center p-6">
+        <div class="max-w-md w-full glow-card border border-slate-800 rounded-3xl p-8 shadow-2xl">
+            <div class="text-center mb-8">
+                <div class="inline-flex p-3 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 mb-4">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                </div>
+                <h2 class="text-2xl font-bold text-white tracking-tight">Autonomous Core Access</h2>
+                <p class="text-xs text-slate-400 mt-1">Authenticate to link telemetry & daemon feedback loops.</p>
+            </div>
             
             <form id="auth-form" onsubmit="handleAuth(event)" class="space-y-4">
                 <div id="name-field" class="hidden">
-                    <label class="block text-xs font-medium text-slate-400 mb-1">Name</label>
-                    <input type="text" id="name" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-emerald-500 text-white">
+                    <label class="block text-xs font-mono uppercase tracking-wider text-slate-400 mb-1">Agent Handle</label>
+                    <input type="text" id="auth-name" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-emerald-500 text-white">
                 </div>
                 <div>
-                    <label class="block text-xs font-medium text-slate-400 mb-1">Email</label>
-                    <input type="email" id="email" required class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-emerald-500 text-white" value="abhishek@test.com">
+                    <label class="block text-xs font-mono uppercase tracking-wider text-slate-400 mb-1">Secure Identifier (Email)</label>
+                    <input type="email" id="auth-email" required class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-emerald-500 text-white" value="abhishek@test.com">
                 </div>
                 <div>
-                    <label class="block text-xs font-medium text-slate-400 mb-1">Password</label>
-                    <input type="password" id="password" required class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-emerald-500 text-white" value="password123">
+                    <label class="block text-xs font-mono uppercase tracking-wider text-slate-400 mb-1">Access Key</label>
+                    <input type="password" id="auth-password" required class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-emerald-500 text-white" value="password123">
                 </div>
-                <button type="submit" id="auth-submit-btn" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-medium py-2.5 rounded-xl transition text-sm">Login</button>
+                <button type="submit" id="auth-submit-btn" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-semibold py-3 rounded-xl transition text-sm shadow-lg shadow-emerald-950/50">Establish Uplink</button>
             </form>
             
             <div class="mt-6 text-center text-xs text-slate-400">
-                <span id="auth-toggle-text">Don't have an account?</span>
-                <button onclick="toggleAuthMode()" id="auth-toggle-btn" class="text-emerald-400 font-medium ml-1 hover:underline">Sign up</button>
+                <span id="auth-toggle-text">New agent?</span>
+                <button onclick="toggleAuthMode()" id="auth-toggle-btn" class="text-emerald-400 font-semibold ml-1 hover:underline">Register clearance</button>
             </div>
-        </section>
+        </div>
+    </div>
 
-        <!-- DASHBOARD SECTION (Visible when logged in) -->
-        <section id="dashboard-section" class="hidden space-y-8">
-            <!-- Header Stats -->
-            <div class="flex flex-col md:flex-row justify-between items-start md:items-center bg-slate-900 border border-slate-800 rounded-2xl p-6 gap-4">
+    <!-- COMMAND CENTER APP SHELL -->
+    <div id="screen-app" class="hidden min-h-screen flex flex-col">
+        <header class="border-b border-slate-800 bg-slate-900/50 backdrop-blur sticky top-0 z-50 px-8 py-4 flex justify-between items-center">
+            <div class="flex items-center space-x-6">
+                <div class="flex items-center space-x-3">
+                    <div class="h-3 w-3 rounded-full bg-emerald-500 animate-pulse"></div>
+                    <span class="font-bold text-sm tracking-wider text-white">AI SKILL SENSE <span class="text-xs text-emerald-400 font-mono ml-2">COMMAND CENTER</span></span>
+                </div>
+                <nav class="hidden md:flex space-x-2">
+                    <button onclick="switchView('dashboard')" id="nav-dashboard" class="px-3.5 py-1.5 rounded-lg text-xs font-medium transition bg-slate-800 text-white">Overview</button>
+                    <button onclick="switchView('matrix')" id="nav-matrix" class="px-3.5 py-1.5 rounded-lg text-xs font-medium transition text-slate-400 hover:text-white">Life Matrix</button>
+                    <button onclick="switchView('quests')" id="nav-quests" class="px-3.5 py-1.5 rounded-lg text-xs font-medium transition text-slate-400 hover:text-white">Quests Hub</button>
+                    <button onclick="switchView('telemetry')" id="nav-telemetry" class="px-3.5 py-1.5 rounded-lg text-xs font-medium transition text-slate-400 hover:text-white">Telemetry & Bridge</button>
+                </nav>
+            </div>
+            <div class="flex items-center space-x-4">
+                <span id="user-display" class="text-xs font-mono text-slate-400"></span>
+                <button onclick="logout()" class="text-xs bg-red-500/10 text-red-400 border border-red-500/20 px-3 py-1.5 rounded-lg hover:bg-red-500/20 transition font-medium">Disconnect</button>
+            </div>
+        </header>
+
+        <main class="flex-1 max-w-7xl w-full mx-auto px-6 py-8">
+            <!-- DYNAMIC VIEW CONTAINER -->
+            <div id="view-container"></div>
+        </main>
+    </div>
+
+    <!-- UNIVERSAL DEEP-DIVE INSPECTION MODAL -->
+    <div id="inspector-modal" class="fixed inset-0 modal-backdrop hidden z-50 flex items-center justify-center p-4">
+        <div class="glow-card border border-slate-800 rounded-3xl max-w-xl w-full p-8 shadow-2xl relative">
+            <div class="flex justify-between items-start mb-6">
                 <div>
-                    <h1 id="welcome-msg" class="text-2xl font-bold text-white">Hello, Abhishek</h1>
-                    <p class="text-sm text-slate-400">Your autonomous life-growth ecosystem is active.</p>
+                    <span id="modal-tag" class="text-[10px] font-mono uppercase tracking-widest px-2.5 py-1 rounded-md bg-slate-800 text-emerald-400"></span>
+                    <h3 id="modal-title" class="text-xl font-bold text-white mt-2"></h3>
                 </div>
-                <div class="flex gap-4">
-                    <div class="bg-slate-950 border border-slate-800 px-5 py-3 rounded-xl text-center">
-                        <span class="block text-xs text-slate-500 uppercase tracking-wider">Overall XP</span>
-                        <span id="stat-xp" class="text-xl font-bold text-emerald-400">0</span>
-                    </div>
-                </div>
+                <button onclick="closeInspector()" class="text-slate-400 hover:text-white text-sm font-mono bg-slate-900 border border-slate-800 px-3 py-1 rounded-xl">✕</button>
             </div>
+            <div id="modal-body" class="space-y-4 text-xs text-slate-300"></div>
+            <div id="modal-actions" class="mt-6 pt-4 border-t border-slate-800/80 flex gap-3 justify-end"></div>
+        </div>
+    </div>
 
-            <!-- Pillars Grid -->
-            <div>
-                <h3 class="text-lg font-semibold mb-4 text-white">Life Pillars Matrix</h3>
-                <div id="pillars-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    <!-- Dynamically populated -->
-                </div>
-            </div>
-
-            <!-- Active Quests & Proof of Work -->
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                <!-- Quests Panel -->
-                <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6">
-                    <div class="flex justify-between items-center mb-4">
-                        <h3 class="text-lg font-semibold text-white">Active Quests</h3>
-                        <button onclick="generateQuest()" class="text-xs bg-slate-800 hover:bg-slate-700 border border-slate-700 px-3 py-1.5 rounded-lg text-emerald-400 transition">+ Generate Quest</button>
-                    </div>
-                    <div id="quests-container" class="space-y-4">
-                        <!-- Dynamically populated -->
-                    </div>
-                </div>
-
-                <!-- Proof of Work Submission Modal/Panel -->
-                <div id="proof-panel" class="bg-slate-900 border border-slate-800 rounded-2xl p-6 hidden">
-                    <h3 class="text-lg font-semibold mb-2 text-white">Submit Proof of Work</h3>
-                    <p id="proof-quest-title" class="text-xs text-emerald-400 mb-4 font-medium"></p>
-                    <input type="hidden" id="active-quest-id">
-                    <div class="space-y-4">
-                        <div>
-                            <label class="block text-xs font-medium text-slate-400 mb-1">What did you build or accomplish?</label>
-                            <textarea id="proof-text" rows="4" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-sm focus:outline-none focus:border-emerald-500 text-white" placeholder="Provide details, PR links, or learning reflections..."></textarea>
-                        </div>
-                        <div class="flex gap-3">
-                            <button onclick="submitProof()" class="flex-1 bg-emerald-600 hover:bg-emerald-500 text-white font-medium py-2.5 rounded-xl transition text-sm">Verify & Complete</button>
-                            <button onclick="cancelProof()" class="bg-slate-800 hover:bg-slate-700 text-slate-300 px-4 py-2.5 rounded-xl transition text-sm">Cancel</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-    </main>
-
+    <!-- SCRIPT LOADER -->
+    <script src="js/api.js"></script>
+    <script src="js/dashboard.js"></script>
+    <script src="js/matrix.js"></script>
+    <script src="js/quests.js"></script>
+    <script src="js/integrations.js"></script>
     <script>
-        const API_URL = 'http://localhost:5000/api';
         let isSignup = false;
-
-        function getToken() { return localStorage.getItem('token'); }
 
         function toggleAuthMode() {
             isSignup = !isSignup;
-            document.getElementById('auth-title').innerText = isSignup ? 'Create Account' : 'Welcome Back';
             document.getElementById('name-field').classList.toggle('hidden', !isSignup);
-            document.getElementById('auth-submit-btn').innerText = isSignup ? 'Sign Up' : 'Login';
-            document.getElementById('auth-toggle-text').innerText = isSignup ? 'Already have an account?' : "Don't have an account?";
-            document.getElementById('auth-toggle-btn').innerText = isSignup ? 'Login' : 'Sign up';
+            document.getElementById('auth-submit-btn').innerText = isSignup ? 'Initialize Registration' : 'Establish Uplink';
+            document.getElementById('auth-toggle-text').innerText = isSignup ? 'Already cleared?' : 'New agent?';
+            document.getElementById('auth-toggle-btn').innerText = isSignup ? 'Access login' : 'Register clearance';
         }
 
         async function handleAuth(event) {
             event.preventDefault();
-            const email = document.getElementById('email').value;
-            const password = document.getElementById('password').value;
-            const name = document.getElementById('name').value;
+            const email = document.getElementById('auth-email').value;
+            const password = document.getElementById('auth-password').value;
+            const name = document.getElementById('auth-name').value;
 
-            const endpoint = isSignup ? `${API_URL}/auth/signup` : `${API_URL}/auth/login`;
+            const endpoint = isSignup ? '/auth/register' : '/auth/login';
             const payload = isSignup ? { name, email, password } : { email, password };
 
             try {
-                const res = await fetch(endpoint, {
+                const data = await apiRequest(endpoint, {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(payload)
                 });
-                const data = await res.json();
-                if (!res.ok) throw new Error(data.error || 'Authentication failed');
-
                 localStorage.setItem('token', data.token);
-                checkAuth();
+                checkAuthState();
             } catch (err) {
                 alert(err.message);
             }
@@ -152,149 +132,51 @@
 
         function logout() {
             localStorage.removeItem('token');
-            checkAuth();
+            checkAuthState();
         }
 
-        async function checkAuth() {
-            const token = getToken();
-            const authSection = document.getElementById('auth-section');
-            const dashboardSection = document.getElementById('dashboard-section');
-            const userDisplay = document.getElementById('user-display');
-            const logoutBtn = document.getElementById('logout-btn');
-
+        function checkAuthState() {
+            const token = localStorage.getItem('token');
             if (token) {
-                authSection.classList.add('hidden');
-                dashboardSection.classList.remove('hidden');
-                logoutBtn.classList.remove('hidden');
-                loadDashboardData();
+                document.getElementById('screen-auth').classList.add('hidden');
+                document.getElementById('screen-app').classList.remove('hidden');
+                switchView('dashboard');
             } else {
-                authSection.classList.remove('hidden');
-                dashboardSection.classList.add('hidden');
-                logoutBtn.classList.add('hidden');
+                document.getElementById('screen-auth').classList.remove('hidden');
+                document.getElementById('screen-app').classList.add('hidden');
             }
         }
 
-        async function loadDashboardData() {
-            try {
-                const res = await fetch(`${API_URL}/users/matrix`, {
-                    headers: { 'Authorization': `Bearer ${getToken()}` }
-                });
-                const data = await res.json();
-                if (!res.ok) throw new Error(data.error);
+        function switchView(viewName) {
+            ['dashboard', 'matrix', 'quests', 'telemetry'].forEach(v => {
+                document.getElementById(`nav-${v}`)?.classList.replace('bg-slate-800', 'text-slate-400');
+                document.getElementById(`nav-${v}`)?.classList.replace('text-white', 'text-slate-400');
+            });
+            document.getElementById(`nav-${viewName}`)?.classList.replace('text-slate-400', 'bg-slate-800');
+            document.getElementById(`nav-${viewName}`)?.classList.replace('text-slate-400', 'text-white');
 
-                document.getElementById('welcome-msg').innerText = `Hello, ${data.user.name}`;
-                document.getElementById('stat-xp').innerText = data.user.overallXp || 0;
+            const container = document.getElementById('view-container');
+            container.innerHTML = '';
 
-                // Render Pillars Matrix
-                const pillarsContainer = document.getElementById('pillars-grid');
-                pillarsContainer.innerHTML = '';
-                Object.keys(data.attributeMatrix).forEach(attr => {
-                    const pillar = data.attributeMatrix[attr];
-                    pillarsContainer.innerHTML += `
-                        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5">
-                            <div class="flex justify-between items-center mb-3">
-                                <span class="font-semibold text-white text-sm">${attr}</span>
-                                <span class="text-xs bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2 py-0.5 rounded-full">Level ${pillar.level}</span>
-                            </div>
-                            <div class="flex justify-between text-xs text-slate-400 mb-1">
-                                <span>Total XP: ${pillar.totalXp}</span>
-                                <span>Skills: ${pillar.totalSkills}</span>
-                            </div>
-                            <div class="w-full bg-slate-950 h-2 rounded-full overflow-hidden border border-slate-800">
-                                <div class="bg-emerald-500 h-full rounded-full" style="width: ${Math.min((pillar.totalXp % 150) / 1.5, 100)}%"></div>
-                            </div>
-                        </div>
-                    `;
-                });
-
-                // Render Quests
-                const questsContainer = document.getElementById('quests-container');
-                questsContainer.innerHTML = '';
-                const pendingQuests = data.user.quests.filter(q => q.status === 'PENDING');
-                
-                if (pendingQuests.length === 0) {
-                    questsContainer.innerHTML = `<p class="text-xs text-slate-500 italic">No active quests. Click generate to request one.</p>`;
-                } else {
-                    pendingQuests.forEach(uq => {
-                        questsContainer.innerHTML += `
-                            <div class="bg-slate-950 border border-slate-800 rounded-xl p-4 flex flex-col gap-2">
-                                <div class="flex justify-between items-start">
-                                    <h4 class="font-medium text-white text-sm">${uq.quest.title}</h4>
-                                    <span class="text-[10px] bg-slate-800 text-slate-300 px-2 py-0.5 rounded">${uq.quest.attribute}</span>
-                                </div>
-                                <p class="text-xs text-slate-400">${uq.quest.description}</p>
-                                <button onclick="openProofPanel('${uq.id}', '${uq.quest.title}')" class="mt-2 self-end text-xs bg-emerald-600 hover:bg-emerald-500 text-white font-medium px-3 py-1.5 rounded-lg transition">Complete with Proof</button>
-                            </div>
-                        `;
-                    });
-                }
-
-            } catch (err) {
-                console.error(err);
-            }
+            if (viewName === 'dashboard') renderDashboardView(container);
+            else if (viewName === 'matrix') renderMatrixView(container);
+            else if (viewName === 'quests') renderQuestsView(container);
+            else if (viewName === 'telemetry') renderTelemetryView(container);
         }
 
-        async function generateQuest() {
-            try {
-                const attributes = ['COGNITIVE', 'PHYSICAL', 'EMOTIONAL', 'TECHNICAL', 'CREATIVE', 'FINANCIAL'];
-                const randomAttr = attributes[Math.floor(Math.random() * attributes.length)];
-
-                const res = await fetch(`${API_URL}/quests/generate`, {
-                    method: 'POST',
-                    headers: { 
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${getToken()}` 
-                    },
-                    body: JSON.stringify({ attribute: randomAttr })
-                });
-                if (!res.ok) throw new Error('Failed to generate quest');
-                loadDashboardData();
-            } catch (err) {
-                alert(err.message);
-            }
+        function openInspector(tag, title, bodyHtml, actionsHtml = '') {
+            document.getElementById('modal-tag').innerText = tag;
+            document.getElementById('modal-title').innerText = title;
+            document.getElementById('modal-body').innerHTML = bodyHtml;
+            document.getElementById('modal-actions').innerHTML = actionsHtml;
+            document.getElementById('inspector-modal').classList.remove('hidden');
         }
 
-        function openProofPanel(userQuestId, title) {
-            document.getElementById('active-quest-id').value = userQuestId;
-            document.getElementById('proof-quest-title').innerText = `Target: ${title}`;
-            document.getElementById('proof-panel').classList.remove('hidden');
+        function closeInspector() {
+            document.getElementById('inspector-modal').classList.add('hidden');
         }
 
-        function cancelProof() {
-            document.getElementById('proof-panel').classList.add('hidden');
-            document.getElementById('proof-text').value = '';
-        }
-
-        async function submitProof() {
-            const userQuestId = document.getElementById('active-quest-id').value;
-            const proofText = document.getElementById('proof-text').value;
-
-            if (!proofText || proofText.trim().length < 5) {
-                alert('Please provide meaningful proof text.');
-                return;
-            }
-
-            try {
-                const res = await fetch(`${API_URL}/quests/complete`, {
-                    method: 'POST',
-                    headers: { 
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${getToken()}` 
-                    },
-                    body: JSON.stringify({ userQuestId, proofText })
-                });
-                const data = await res.json();
-                if (!res.ok) throw new Error(data.error);
-
-                alert(data.message);
-                cancelProof();
-                loadDashboardData();
-            } catch (err) {
-                alert(err.message);
-            }
-        }
-
-        checkAuth();
+        checkAuthState();
     </script>
 </body>
 </html>

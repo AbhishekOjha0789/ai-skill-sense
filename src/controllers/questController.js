@@ -1,16 +1,10 @@
 import prisma from '../services/prisma.js';
 import { generateAiQuestPrompt } from '../services/questGenerator.js';
-
-const VALID_ATTRIBUTES = ['COGNITIVE', 'PHYSICAL', 'EMOTIONAL', 'TECHNICAL', 'CREATIVE', 'FINANCIAL'];
+import { generateEmbedding } from '../services/embeddingService.js';
 
 export async function generateAndAssignQuest(req, res) {
   try {
     const { userId, attribute } = req.body;
-
-    if (!userId || !attribute || !VALID_ATTRIBUTES.includes(attribute)) {
-      return res.status(400).json({ error: 'Valid userId and one of the 6 attributes are required.' });
-    }
-
     const questContent = await generateAiQuestPrompt(attribute);
 
     const newQuest = await prisma.quest.create({
@@ -23,47 +17,29 @@ export async function generateAndAssignQuest(req, res) {
     });
 
     const userQuest = await prisma.userQuest.create({
-      data: {
-        userId: userId,
-        questId: newQuest.id,
-        status: 'PENDING'
-      }
+      data: { userId, questId: newQuest.id, status: 'PENDING' }
     });
 
-    await prisma.dataSourceLog.create({
-      data: {
-        source: 'AI_QUEST_GENERATOR',
-        payload: JSON.stringify({ userId, questId: newQuest.id, attribute })
-      }
-    });
-
-    return res.status(201).json({
-      message: 'AI Quest successfully generated and assigned!',
-      quest: newQuest,
-      userQuestStatus: userQuest
-    });
-
+    return res.status(201).json({ message: 'AI Quest assigned!', quest: newQuest, userQuestStatus: userQuest });
   } catch (error) {
-    console.error('Quest generation error:', error.message);
     return res.status(500).json({ error: error.message });
   }
 }
 
-export async function completeQuest(req, res) {
+export async function completeQuestWithProof(req, res) {
   try {
-    const { userQuestId } = req.body;
+    const { userId, userQuestId, proofText } = req.body;
 
-    if (!userQuestId) {
-      return res.status(400).json({ error: 'Missing userQuestId' });
+    if (!userQuestId || !proofText) {
+      return res.status(400).json({ error: 'Missing userQuestId or proofText.' });
     }
 
-    // 1. Find the user quest along with its master quest details
     const userQuest = await prisma.userQuest.findUnique({
       where: { id: userQuestId },
       include: { quest: true }
     });
 
-    if (!userQuest) {
+    if (!userQuest || userQuest.userId !== userId) {
       return res.status(404).json({ error: 'User quest not found.' });
     }
 
@@ -71,64 +47,61 @@ export async function completeQuest(req, res) {
       return res.status(400).json({ error: 'Quest is already completed.' });
     }
 
-    // 2. Mark the user quest as COMPLETED
-    const updatedUserQuest = await prisma.userQuest.update({
-      where: { id: userQuestId },
-      data: { status: 'COMPLETED' }
-    });
-
     const attribute = userQuest.quest.attribute;
     const xpReward = userQuest.quest.xpReward;
 
-    // 3. Find or auto-create a skill under this attribute to hold the XP progress
-    let targetSkill = await prisma.skill.findFirst({
-      where: { 
-        userId: userQuest.userId, 
-        attribute: attribute 
-      },
-      include: { progress: true }
-    });
+    // 1. Convert the proof-of-work into a permanent verified skill record automatically
+    const skillName = `Quest Accomplished: ${userQuest.quest.title}`;
+    const textToEmbed = `${skillName}: ${proofText}`;
+    const embedding = await generateEmbedding(textToEmbed);
+    const vectorString = `[${embedding.join(',')}]`;
 
-    // If no skill exists for this attribute yet, create a default one automatically!
-    if (!targetSkill) {
-      targetSkill = await prisma.skill.create({
+    const result = await prisma.$transaction(async (tx) => {
+      // Mark user quest as completed
+      const updatedUserQuest = await tx.userQuest.update({
+        where: { id: userQuestId },
+        data: { status: 'COMPLETED' }
+      });
+
+      // Create permanent skill from proof
+      const newSkill = await tx.skill.create({
         data: {
-          userId: userQuest.userId,
-          name: `${attribute} Mastery`,
-          description: `Auto-generated skill pillar for ${attribute}`,
+          userId,
+          name: skillName,
+          description: proofText,
           attribute: attribute,
           verified: true
-        },
-        include: { progress: true }
+        }
       });
-    }
 
-    let progressResult = null;
+      await tx.$executeRaw`
+        UPDATE "Skill" 
+        SET embedding = ${vectorString}::vector 
+        WHERE id = ${newSkill.id}
+      `;
 
-    if (targetSkill.progress && targetSkill.progress.length > 0) {
-      const currentProgress = targetSkill.progress[0];
-      const newXp = currentProgress.xp + xpReward;
-      const newLevel = Math.floor(newXp / 150) + 1;
-
-      progressResult = await prisma.userSkillProgress.update({
-        where: { id: currentProgress.id },
-        data: { xp: newXp, level: newLevel }
+      // Find or create skill progress entry to award XP
+      let targetProgress = await tx.userSkillProgress.findFirst({
+        where: { skillId: newSkill.id }
       });
-    } else {
+
       const newLevel = Math.floor(xpReward / 150) + 1;
-      progressResult = await prisma.userSkillProgress.create({
+      const progressResult = await tx.userSkillProgress.create({
         data: {
-          skillId: targetSkill.id,
+          skillId: newSkill.id,
           xp: xpReward,
           level: newLevel
         }
       });
-    }
+
+      return { updatedUserQuest, newSkill, progressResult };
+    });
 
     return res.status(200).json({
-      message: `Quest successfully completed! Awarded +${xpReward} XP to your ${attribute} matrix.`,
-      userQuest: updatedUserQuest,
-      updatedProgress: progressResult
+      message: `Proof verified! Quest completed and +${xpReward} XP awarded to your ${attribute} matrix.`,
+      userQuest: result.updatedUserQuest,
+      skill: result.newSkill,
+      progress: result.progressResult
     });
 
   } catch (error) {

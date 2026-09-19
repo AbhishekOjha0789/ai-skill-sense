@@ -1,6 +1,7 @@
 import prisma from '../services/prisma.js';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
+import { DaemonController } from '../agents/daemon.controller.js';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'aiskillsense_super_secret_jwt_key_2026';
 
@@ -28,6 +29,8 @@ export async function register(req, res) {
     });
 
     const token = jwt.sign({ userId: user.id, email: user.email }, JWT_SECRET, { expiresIn: '7d' });
+
+    await DaemonController.handleUserRegistrationOnboarding(user.id);
 
     return res.status(201).json({
       message: 'User registered successfully!',

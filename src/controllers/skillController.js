@@ -1,9 +1,10 @@
 import prisma from '../services/prisma.js';
-import { generateEmbedding } from '../services/embeddingService.js'; // Assuming you have this service
+import { generateEmbedding } from '../services/embeddingService.js';
 
 export async function submitSkill(req, res) {
   try {
-    const { userId, name, description, attribute } = req.body;
+    const userId = req.body.userId;
+    const { name, description, attribute } = req.body;
 
     if (!userId || !name || !attribute) {
       return res.status(400).json({ error: 'User ID, name, and attribute are required.' });
@@ -21,9 +22,9 @@ export async function submitSkill(req, res) {
     const embedding = await generateEmbedding(textToEmbed);
     const vectorString = `[${embedding.join(',')}]`;
 
-    // 3. Check for high semantic duplicates using pgvector (Threshold > 0.88)
+    // 3. Check for high semantic duplicates using fixed pgvector query syntax (Added SELECT)
     const existingSkills = await prisma.$queryRaw`
-      id, name, 1 - (embedding <=> ${vectorString}::vector) as similarity
+      SELECT id, name, 1 - (embedding <=> ${vectorString}::vector) as similarity
       FROM "Skill"
       WHERE "userId" = ${userId}
     `;
@@ -36,38 +37,47 @@ export async function submitSkill(req, res) {
       });
     }
 
-    // 4. Create the skill if it passes all guards
-    const newSkill = await prisma.skill.create({
-      data: {
-        userId,
-        name,
-        description,
-        attribute,
-        verified: true, // Auto-verified since it passed intelligence guards
-      }
+    // 4. Create the skill and properly assign the vector embedding via raw SQL
+    const result = await prisma.$transaction(async (tx) => {
+      const newSkill = await tx.skill.create({
+        data: {
+          userId,
+          name,
+          description,
+          attribute,
+          verified: true,
+        }
+      });
+
+      await tx.$executeRaw`
+        UPDATE "Skill" 
+        SET embedding = ${vectorString}::vector 
+        WHERE id = ${newSkill.id}
+      `;
+
+      const progress = await tx.userSkillProgress.create({
+        data: {
+          skillId: newSkill.id,
+          xp: 50,
+          level: 1
+        }
+      });
+
+      return { newSkill, progress };
     });
 
-    // 5. Create initial progress entry for the new skill (+50 XP)
-    const progress = await prisma.userSkillProgress.create({
-      data: {
-        skillId: newSkill.id,
-        xp: 50,
-        level: 1
-      }
-    });
-
-    // 6. Log the successful guard check
+    // 5. Log the successful guard check
     await prisma.dataSourceLog.create({
       data: {
         source: 'SEMANTIC_GUARD_ENGINE',
-        payload: JSON.stringify({ userId, skillId: newSkill.id, status: 'PASSED' })
+        payload: JSON.stringify({ userId, skillId: result.newSkill.id, status: 'PASSED' })
       }
     });
 
     return res.status(201).json({
       message: 'Skill successfully verified and logged!',
-      skill: newSkill,
-      progress
+      skill: result.newSkill,
+      progress: result.progress
     });
 
   } catch (error) {

@@ -12,6 +12,8 @@ async function getDefaultUser() {
   return await prisma.user.findFirst();
 }
 
+router.post('/api/daemon/proactive-audit', DaemonController.handleProactiveAuditWebhook);
+
 /**
  * 1. GITHUB WEBHOOK (Screen / Code Architecture)
  * Listens to push, pull request, and issue events.

@@ -8,7 +8,6 @@ import authRoutes from './routes/authRoutes.js';
 import webhookRoutes from './routes/webhookRoutes.js';
 import skillRoutes from './routes/skillRoutes.js';
 import agentRoutes from './routes/agentRoutes.js';
-import { commanderDaemon } from './agents/commander.autonomous.js';
 import verificationRoutes from './routes/verificationRoutes.js';
 import questRoutes from './routes/questRoutes.js';
 import profileRoutes from './routes/profileRoutes.js';
@@ -23,9 +22,6 @@ const PORT = process.env.PORT || 5000;
 
 app.use(cors());
 app.use(express.json());
-
-// Start the 24/7 background supervisor daemon
-commanderDaemon.startBackgroundDaemon();
 
 // Serve static frontend dashboard
 app.use(express.static(path.join(__dirname, '../public')));

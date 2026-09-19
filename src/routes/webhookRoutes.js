@@ -1,5 +1,6 @@
 import express from 'express';
 import { CommanderEngine } from '../agents/commander.engine.js';
+import { DaemonController } from '../agents/daemon.controller.js'; // ◄── ADD THIS IMPORT
 import prisma from '../services/prisma.js';
 
 const router = express.Router();
